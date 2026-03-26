@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>Ancla</title>
+    <style>
+        /* ===== RESET Y VARIABLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        img,
+        video {
+            max-width: 100%;
+            height: auto;
+        }
+
+        body {
+            background: #ffeed9;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+        }
+
+        /* ===== CONTENEDOR PRINCIPAL ===== */
+        .phone-frame {
+            width: 100%;
+            max-width: 1300px;
+            background: white;
+            border-radius: 36px 36px 28px 28px;
+            box-shadow: 0 25px 50px -10px rgba(255, 140, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 2px solid #ffb347;
+        }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            background: #ff9900;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 4px solid #ffdd99;
+            width: 100%;
+        }
+
+        .logo-placeholder {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #ff9900;
+            border: 2px solid #ffe68f;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: clamp(1.2rem, 4vw, 2rem);
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+            text-shadow: 2px 2px 0 #b85e00;
+            line-height: 1.2;
+        }
+
+        .header-title span {
+            color: #fff7aa;
+        }
+
+        /* ===== CONTENEDOR PARA SIDEBAR + MAIN ===== */
+        .content-row {
+            display: flex;
+            flex-direction: row;
+            flex: 1;
+            min-height: 100%;
+            background: #fffcf0;
+        }
+
+        /* ===== BARRA LATERAL (toolbar) ===== */
+        .sidebar {
+            width: 90px;
+            background: #ff9900;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 0 20px 0;
+            gap: 40px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.75rem;
+            letter-spacing: 0.3px;
+            width: 100%;
+            padding: 12px 0;
+            cursor: pointer;
+            border-radius: 40px 0 0 40px;
+            transition: 0.15s;
+            border: none;
+            background: transparent;
+            text-decoration: none;
+        }
+
+        .sidebar-item.active {
+            background: #ffdd99;
+            color: #b85e00;
+            box-shadow: inset 0 0 0 2px white;
+        }
+
+        .sidebar-item i {
+            font-size: 2rem;
+            filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.1));
+            margin-bottom: 6px;
+        }
+
+        .sidebar-item span {
+            background: rgba(255, 255, 240, 0.2);
+            padding: 3px 8px;
+            border-radius: 30px;
+            width: 90%;
+            text-align: center;
+            color: #3d2b00;
+            font-weight: 600;
+        }
+
+        .sidebar-item.active span {
+            background: white;
+            color: #c35f00;
+        }
+
+        /* ===== CONTENIDO PRINCIPAL (vistas) ===== */
+        .main-content {
+            flex: 1;
+            background: #fffcf0;
+            padding: 28px 24px;
+            overflow-y: auto;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* todas las vistas (por defecto ocultas) */
+        .view {
+            display: none;
+            animation: fade 0.25s ease;
+            flex: 1;
+            /* allow view to push footer down */
+        }
+
+        .view:target {
+            display: block;
+        }
+
+        #inicio,
+        #consumo {
+            display: block;
+        }
+
+        #perfil:target,
+        #actividades:target,
+        #consumo:target {
+            display: block;
+        }
+
+        #actividades {
+            display: none;
+        }
+
+        #perfil {
+            display: none;
+        }
+
+        #actividades:target {
+            display: block;
+        }
+
+        #perfil:target {
+            display: block;
+        }
+
+        .main-content #consumo,
+        .main-content #actividades,
+        .main-content #perfil {
+            display: none;
+        }
+
+        .main-content #consumo {
+            display: block;
+        }
+
+        #actividades:target,
+        #perfil:target {
+            display: block !important;
+        }
+
+        #actividades:target~#consumo,
+        #perfil:target~#consumo {
+            display: none !important;
+        }
+
+        .main-content #actividades:target,
+        .main-content #perfil:target {
+            display: block;
+        }
+
+        .main-content #actividades:target~#consumo,
+        .main-content #perfil:target~#consumo {
+            display: none;
+        }
+
+        /* ----- vista 1 (principal) Horas de consumo ----- */
+        .section-title {
+            color: #e16500;
+            font-weight: 700;
+            font-size: 1.8rem;
+            border-left: 10px solid #ffbb33;
+            padding-left: 18px;
+            margin: 0 0 20px 0;
+        }
+
+        .graph-card {
+            background: white;
+            border-radius: 40px;
+            padding: 20px 18px 30px 18px;
+            box-shadow: 0 10px 15px -8px #ffc285;
+            border: 1px solid #ffcf8a;
+            margin-bottom: 30px;
+        }
+
+        .graph-bars {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 180px;
+            gap: 8px;
+            margin: 25px 0 10px;
+        }
+
+        .bar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .bar {
+            width: 100%;
+            background: #ffb347;
+            border-radius: 20px 20px 6px 6px;
+            min-height: 8px;
+            transition: height 0.3s;
+            border: 2px solid #ff8c1a;
+        }
+
+        .bar-label {
+            margin-top: 12px;
+            font-weight: 600;
+            color: #b85e00;
+            font-size: 0.9rem;
+        }
+
+        .stats-row {
+            background: #fff3d2;
+            border-radius: 28px;
+            padding: 18px;
+            margin-top: 18px;
+            color: #b34e00;
+        }
+
+        .apps-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .app-item {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 60px;
+            padding: 8px 20px;
+            border: 2px solid #ffd280;
+            color: #984700;
+            font-weight: 600;
+        }
+
+        .app-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+
+        .app-name {
+            flex: 2;
+            font-size: 1.2rem;
+        }
+
+        .app-hours {
+            background: #ffbb33;
+            padding: 5px 20px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 700;
+        }
+
+        /* ----- vista 2: actividades ----- */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .video-card {
+            background: white;
+            border-radius: 40px;
+            border: 3px solid #f9b83a;
+            overflow: hidden;
+            transition: transform 0.1s;
+            box-shadow: 0 10px 12px #ffe5b4;
+        }
+
+        .video-card:hover {
+            transform: scale(1.01);
+            border-color: #ff9900;
+        }
+
+        .video-thumb {
+            background: #ffe085;
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #bf6000;
+        }
+
+        .video-card h3 {
+            background: #fff0c0;
+            padding: 12px 16px;
+            color: #7f4800;
+        }
+
+        .video-card a {
+            display: block;
+            background: #ffa621;
+            text-align: center;
+            padding: 12px;
+            color: white;
+            font-weight: 700;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+        }
+
+        .video-card a:hover {
+            background: #e08400;
+        }
+
+        .libros-seccion {
+            background: #fff3bf;
+            border-radius: 40px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+
+        .libros-lista {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .libro-link {
+            background: white;
+            border: 2px solid #ffb347;
+            border-radius: 60px;
+            padding: 12px 20px;
+            color: #b45100;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .libro-link:hover {
+            background: #ffcf85;
+        }
+
+        /* ----- vista 3: perfil ----- */
+        .perfil-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(145deg, #ffe5aa, #ffc76e);
+            border-radius: 60px;
+            padding: 30px 20px;
+            margin-bottom: 25px;
+        }
+
+        .avatar {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 5px solid #ff9900;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffe5aa;
+            margin-bottom: 10px;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .nombre-usuario {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #9d4d00;
+        }
+
+        .consecuencias-box {
+            background: #ffdcb5;
+            border-radius: 48px;
+            padding: 25px;
+            border: 4px solid #ffbc5c;
+        }
+
+        .consecuencias-box h2 {
+            color: #b15700;
+            font-size: 1.9rem;
+            border-bottom: 4px solid #ffbc5c;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+        }
+
+        .lista-consecuencias {
+            list-style: none;
+        }
+
+        .lista-consecuencias li {
+            background: white;
+            margin: 12px 0;
+            padding: 16px 22px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #7a4400;
+            box-shadow: 0 4px 0 #fbaa3b;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .lista-consecuencias li span {
+            font-size: 1.8rem;
+        }
+
+        .tiny-note {
+            color: #c16d00;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        /* ===== FOOTER ===== */
+        .app-footer {
+            background: #ffb347;
+            padding: 18px 20px;
+            text-align: center;
+            border-top: 4px solid #ffdd99;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            width: 100%;
+            margin-top: auto;
+            /* keeps it at bottom */
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .footer-content p {
+            margin: 0;
+            color: #4d2e00;
+        }
+
+        .footer-content .copyright {
+            font-size: 0.9rem;
+            color: #f9f3d9;
+            letter-spacing: 1px;
+        }
+
+        @keyframes fade {
+            from {
+                opacity: 0.2;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* ===== MEDIA QUERIES ===== */
+        @media (max-width: 700px) {
+            .phone-frame {
+                border-radius: 20px;
+            }
+
+            .content-row {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-around;
+                padding: 10px 5px;
+                gap: 5px;
+                border-radius: 0;
+                border-bottom: 2px solid #ffdd99;
+            }
+
+            .sidebar-item {
+                border-radius: 20px;
+                padding: 8px;
+            }
+
+            .sidebar-item i {
+                font-size: 1.5rem;
+                margin-bottom: 2px;
+            }
+
+            .sidebar-item span {
+                font-size: 0.75rem;
+                width: auto;
+                background: transparent;
+                color: white;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .header-title {
+                text-align: center;
+            }
+
+            .main-content {
+                padding: 15px 10px;
+            }
+
+            .app-item {
+                flex-direction: column;
+                text-align: center;
+                border-radius: 20px;
+                padding: 15px;
+                gap: 10px;
+            }
+
+            .app-icon {
+                margin-right: 0;
+            }
+
+            .app-name {
+                width: 100%;
+            }
+
+            .app-hours {
+                width: 100%;
+            }
+
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nombre-usuario {
+                font-size: 1.6rem;
+                text-align: center;
+            }
+
+            .lista-consecuencias li {
+                font-size: 1rem;
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .stats-row {
+                font-size: 0.9rem;
+            }
+
+            .graph-bars {
+                gap: 4px;
+            }
+
+            .bar-label {
+                font-size: 0.75rem;
+            }
+
+            .consecuencias-box h2 {
+                font-size: 1.4rem;
+                text-align: center;
+            }
+
+            .section-title {
+                font-size: 1.4rem;
+            }
+
+            .footer-content p {
+                font-size: 0.85rem;
+            }
+
+            .footer-content .copyright {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="phone-frame">
+        <header class="app-header">
+            <div class="logo-placeholder"> 📲 </div>
+            <a href="#consumo" class="header-title">
+                <span>Ancla: tu app para moderar tu scroll en el celular </span>
+            </a>
+        </header>
+
+        <div class="content-row">
+            <nav class="sidebar">
+                <a href="#consumo" class="sidebar-item active" id="link-consumo">
+                    <i>📊</i>
+                    <span>Horas</span>
+                </a>
+                <a href="#actividades" class="sidebar-item">
+                    <i>🏋️</i>
+                    <span>Actividades</span>
+                </a>
+                <a href="#perfil" class="sidebar-item">
+                    <i>👤</i>
+                    <span>Perfil</span>
+                </a>
+            </nav>
+
+            <main class="main-content">
+                <div id="consumo" class="view">
+                    <h1 class="section-title">📱 Horas hoy</h1>
+                    <div class="graph-card">
+                        <div
+                            style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; color: #b45b00;">
+                            <span>🔋 6h 42m de pantalla</span>
+                            <span>📅 12 mar 2025</span>
+                        </div>
+                        <div class="graph-bars">
+                            <div class="bar-item">
+                                <div class="bar" style="height: 70px;"></div><span class="bar-label">Mañana</span>
+                            </div>
+                            <div class="bar-item">
+                                <div class="bar" style="height: 120px;"></div><span class="bar-label">Tarde</span>
+                            </div>
+                            <div class="bar-item">
+                                <div class="bar" style="height: 95px;"></div><span class="bar-label">Noche</span>
+                            </div>
+                        </div>
+                        <div class="stats-row">
+                            <strong>⚡ Tiempo total: 4h 32m frente a 3h recomendado</strong>
+                        </div>
+                    </div>
+
+                    <h2 style="color: #e16500; margin: 20px 0 10px;">📲 Apps más usadas</h2>
+                    <div class="apps-list">
+                        <div class="app-item">
+                            <span class="app-name">TikTok</span>
+                            <span class="app-hours">2h 10m</span>
+                        </div>
+                        <div class="app-item">
+                            <span class="app-name">WhatsApp</span>
+                            <span class="app-hours">1h 32m</span>
+                        </div>
+                        <div class="app-item">
+                            <span class="app-name">Instagram</span>
+                            <span class="app-hours">1h 05m</span>
+                        </div>
+                        <div class="app-item">
+                            <span class="app-name">YouTube</span>
+                            <span class="app-hours">58m</span>
+                        </div>
+                    </div>
+                    <div class="tiny-note">* Basado en configuración del dispositivo (simulado).</div>
+
+                    <div style="height: 50px;"></div>
+                    <footer class="app-footer">
+                        <div class="footer-content">
+                            <p>© 2025 Ancla · Todos los derechos reservados a Maria Camacho, Marecela cusati, Margi
+                                Hernandez y Luis Moriillo</p>
+                            <p class="copyright">Diseñado para un uso responsable del móvil</p>
+                        </div>
+                    </footer>
+                </div>
+
+                <div id="actividades" class="view">
+                    <h1 class="section-title">🏃 Actividades saludables</h1>
+                    <p style="color: #bb5d00; margin-bottom: 8px;">Actividades para detener el scroll</p>
+                    <div class="video-grid">
+                        <div class="video-card">
+                            <div class="video-thumb">🧘 10 min</div>
+                            <h3>Rutinas de pilates</h3>
+                            <a href="https://youtube.com/@movewithnicoleenespanol?si=OL1D6DdXAiJEI9qo" target="_blank">
+                                Move with nicole en español Ver en YouTube</a>
+                        </div>
+                        <div class="video-card">
+                            <div class="video-thumb">🏋️ 20 min</div>
+                            <h3>Rutina fullbody (sin equipo)</h3>
+                            <a href="https://www.youtube.com/watch?v=9p7-YC91Q74" target="_blank">Ver en YouTube</a>
+                        </div>
+                        <div class="video-card">
+                            <div class="video-thumb">🚶 15 min</div>
+                            <h3>Cardio </h3>
+                            <a href="https://youtu.be/ASVcIti-lOU?si=E-ZzgIRE5rVhnU_8" target="_blank">Ver en
+                                YouTube</a>
+                        </div>
+                    </div>
+
+                    <div class="libros-seccion">
+                        <h2 style="color: #a15000; font-size: 2rem;">📖 Libros gratuitos</h2>
+                        <div class="libros-lista">
+                            <a href="https://www.gutenberg.org/ebooks/1342" target="_blank" class="libro-link">📘
+                                Orgullo y Prejuicio</a>
+                            <a href="https://www.gutenberg.org/ebooks/84" target="_blank" class="libro-link">📙
+                                Frankenstein</a>
+                            <a href="https://www.gutenberg.org/ebooks/1661" target="_blank" class="libro-link">📕
+                                Sherlock Holmes</a>
+                            <a href="https://openlibrary.org/works/OL15229263W" target="_blank" class="libro-link">📗
+                                Don Quijote</a>
+                        </div>
+                        <p style="color: #b95f00; margin-top: 15px;">🔗 Enlaces a Project Gutenberg / OpenLibrary.</p>
+
+                        <div style="height: 50px;"></div>
+                        <footer class="app-footer">
+                            <div class="footer-content">
+                                <p>© 2025 Ancla · Todos los derechos reservados a Maria Camacho, Marecela cusati, Margi
+                                    Hernandez y Luis Moriillo</p>
+                                <p class="copyright">Diseñado para un uso responsable del móvil</p>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+
+                <div id="perfil" class="view">
+                    <div class="perfil-header">
+                        <div class="avatar">
+                            <img src="perfil.png" alt="Foto de perfil">
+                        </div>
+                        <div class="nombre-usuario">Margi Hernandez</div>
+                        <div style="background: #fec75e; padding: 6px 20px; border-radius: 80px; color: #673f00;">Plan:
+                            Reducir 2h</div>
+                    </div>
+
+                    <div class="consecuencias-box">
+                        <h2>⚠️ Consecuencias del uso excesivo</h2>
+                        <ul class="lista-consecuencias">
+                            <li> Fatiga visual </li>
+                            <li>Dolores de cabeza</li>
+                            <li> Alteraciones del sueño</li>
+                            <li> Disminuye de la concentración</li>
+                            <li> Menos productividad</li>
+                            <li>problemas posturales</li>
+                        </ul>
+                        <p
+                            style="margin-top: 20px; background: #ffb348; padding: 14px; border-radius: 60px; color: white; text-align: center;">
+                            🔁 Tómate pausas cada 50 minutos.
+                        </p>
+                    </div>
+
+                    <div
+                        style="margin-top: 24px; background: #fff0bb; border-radius: 40px; padding: 16px; text-align: center; border: 2px solid #f90;">
+                        <span style="font-weight:800; display: block;">Hoy llevas 4h 32m. Límite diario: 5h</span>
+
+                        <script>
+                            (function () {
+                                const links = document.querySelectorAll('.sidebar-item');
+                                const updateActive = () => {
+                                    const hash = window.location.hash || '#consumo';
+                                    links.forEach(link => {
+                                        const href = link.getAttribute('href');
+                                        link.classList.toggle('active', href === hash);
+                                    });
+                                    // Vuelve al inicio al cambiar de pestaña
+                                    setTimeout(() => {
+                                        window.scrollTo({ top: 0, behavior: 'auto' });
+                                        const mainContent = document.querySelector('.main-content');
+                                        if (mainContent) mainContent.scrollTop = 0;
+                                    }, 10);
+                                };
+                                window.addEventListener('hashchange', updateActive);
+                                window.addEventListener('load', updateActive);
+                                updateActive();
+                            })();
+                        </script>
+
+                        <footer class="app-footer">
+                            <div class="footer-content">
+                                <p>© 2025 Ancla · Todos los derechos reservados a Maria Camacho, Marecela cusati, Margi
+                                    Hernandez y Luis Moriillo</p>
+                                <p class="copyright">Diseñado para un uso responsable del móvil</p>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+
+</html>
